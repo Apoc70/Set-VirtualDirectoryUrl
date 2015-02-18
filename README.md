@@ -1,5 +1,5 @@
 # Set-VirtualDirectoryUrl
-    .SYNOPSIS
+## SYNOPSIS
     Configure Exchange Server 2013 Virtual Directory Url Settings
    
    	Thomas Stensitzki
@@ -11,11 +11,11 @@
 
     Please send ideas, comments and suggestions to support@granikos.eu 
  
-    .LINK  
+## LINK  
     More information can be found at http://www.granikos.eu/en/scripts 
 	
-    .DESCRIPTION
-	Exchange Server virtual directories (vDirs) require a proper configuration of
+## DESCRIPTION
+    Exchange Server virtual directories (vDirs) require a proper configuration of
     internal and external Urls. This is even more important in a co-existence 
     scenario with legacy Exchange Server versions.
 
@@ -23,7 +23,7 @@
     http://blogs.technet.com/b/exchange/archive/2015/02/11/configuring-multiple-owa-ecp-virtual-directories-on-the-exchange-2013-client-access-server-role.aspx
     
 
-    .NOTES 
+## NOTES 
     Requirements 
     - Windows Server 2008 R2 SP1, Windows Server 2012 or Windows Server 2012 R2
     - Exchange Server 2013
@@ -32,12 +32,13 @@
     -------------------------------------------------------------------------------- 
     1.0     Initial community release 
 	
-	.PARAMETER InternalUrl
+## PARAMETERS
+### PARAMETER InternalUrl
     The internal url FQDN with leading protocol definition, ie. https://mobile.mcsmemail.de
 
-    .PARAMETER ExternalUrl
+### PARAMETER ExternalUrl
     The internal url FQDN with leading protocol definition, ie. https://mobile.mcsmemail.de
    
-	.EXAMPLE
+## EXAMPLE
     Configure internal and external url for different host headers 
     .\Set-VirtualDirectoryUrl -InternalUrl https://internal.mcsmemail.de -ExternalUrl https://mobile.mcsmemail.de
