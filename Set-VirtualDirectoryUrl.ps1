@@ -69,12 +69,12 @@ if($InternalUrl -ne "") {
     Write-Output "Changing InternalUrl settings"
     Write-Output "New INTERNAL Url: $InternalUrl"
     
-    $exchangeServers | Get-AutodiscoverVirtualDirectory | Set-AutodiscoverVirtualDirectory –InternalUrl “$InternalUrl/autodiscover/autodiscover.xml” 
-    $exchangeServers | Set-ClientAccessServer –AutodiscoverServiceInternalUri “$InternalUrl/autodiscover/autodiscover.xml”
-    $exchangeServers | Get-WebServicesVirtualDirectory | Set-WebServicesVirtualDirectory –InternalUrl “$InternalUrl/ews/exchange.asmx”
-    $exchangeServers | Get-OabVirtualDirectory | Set-OabVirtualDirectory –InternalUrl “$InternalUrl/oab”
-    $exchangeServers | Get-OwaVirtualDirectory | Set-OwaVirtualDirectory -InternalUrl “$InternalUrl/owa”
-    $exchangeServers | Get-EcpVirtualDirectory | Set-EcpVirtualDirectory –InternalUrl “$InternalUrl/ecp”
+    $exchangeServers | Get-AutodiscoverVirtualDirectory | Set-AutodiscoverVirtualDirectory -InternalUrl "$InternalUrl/autodiscover/autodiscover.xml"� 
+    $exchangeServers | Set-ClientAccessServer -AutodiscoverServiceInternalUri "$InternalUrl/autodiscover/autodiscover.xml"�
+    $exchangeServers | Get-WebServicesVirtualDirectory | Set-WebServicesVirtualDirectory -InternalUrl "$InternalUrl/ews/exchange.asmx"�
+    $exchangeServers | Get-OabVirtualDirectory | Set-OabVirtualDirectory -InternalUrl "$InternalUrl/oab"�
+    $exchangeServers | Get-OwaVirtualDirectory | Set-OwaVirtualDirectory -InternalUrl "$InternalUrl/owa"�
+    $exchangeServers | Get-EcpVirtualDirectory | Set-EcpVirtualDirectory -InternalUrl "$InternalUrl/ecp"�
     $exchangeServers | Get-ActiveSyncVirtualDirectory | Set-ActiveSyncVirtualDirectory -InternalUrl "$InternalUrl/Microsoft-Server-ActiveSync"
     
     Write-Output "InternalUrl changed"
@@ -90,12 +90,12 @@ if($ExternalUrl -ne "") {
     Write-Output "Changing ExternalUrl settings"
     Write-Output "New EXTERNAL Url: $ExternalUrl"
 
-   $exchangeServers | Get-AutodiscoverVirtualDirectory | Set-AutodiscoverVirtualDirectory –ExternalUrl “$ExternalUrl/autodiscover/autodiscover.xml”
-   $exchangeServers | Set-ClientAccessServer –AutodiscoverServiceInternalUri “$ExternalUrl/autodiscover/autodiscover.xml”
-   $exchangeServers | Get-WebServicesVirtualDirectory | Set-WebServicesVirtualDirectory –ExternalUrl “$ExternalUrl/ews/exchange.asmx”
-   $exchangeServers | Get-OabVirtualDirectory | Set-OabVirtualDirectory –ExternalUrl “$ExternalUrl/oab”
-   $exchangeServers | Get-OwaVirtualDirectory | Set-OwaVirtualDirectory –ExternalUrl “$ExternalUrl/owa”
-   $exchangeServers | Get-EcpVirtualDirectory | Set-EcpVirtualDirectory –ExternalUrl “$ExternalUrl/ecp”
+   $exchangeServers | Get-AutodiscoverVirtualDirectory | Set-AutodiscoverVirtualDirectory -ExternalUrl "$ExternalUrl/autodiscover/autodiscover.xml"�
+   $exchangeServers | Set-ClientAccessServer -AutodiscoverServiceInternalUri "$ExternalUrl/autodiscover/autodiscover.xml"�
+   $exchangeServers | Get-WebServicesVirtualDirectory | Set-WebServicesVirtualDirectory -ExternalUrl "$ExternalUrl/ews/exchange.asmx"�
+   $exchangeServers | Get-OabVirtualDirectory | Set-OabVirtualDirectory -ExternalUrl "$ExternalUrl/oab"�
+   $exchangeServers | Get-OwaVirtualDirectory | Set-OwaVirtualDirectory -ExternalUrl "$ExternalUrl/owa"�
+   $exchangeServers | Get-EcpVirtualDirectory | Set-EcpVirtualDirectory -ExternalUrl "$ExternalUrl/ecp"�
    $exchangeServers | Get-ActiveSyncVirtualDirectory | Set-ActiveSyncVirtualDirectory -ExternalUrl "$ExternalUrl/Microsoft-Server-ActiveSync"
 }
  
