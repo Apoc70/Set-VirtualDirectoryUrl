@@ -1,46 +1,43 @@
 <#
     .SYNOPSIS
-    Configure Exchange Server 2013 Virtual Directory Url Settings
+    Configure Exchange Server 2016+ Virtual Directory Url Settings
    
    	Thomas Stensitzki
 	
 	THIS CODE IS MADE AVAILABLE AS IS, WITHOUT WARRANTY OF ANY KIND. THE ENTIRE 
 	RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS CODE REMAINS WITH THE USER.
 	
-	Version 1.0, 2015-02-18
+	Version 2.0, 2020-12-02
 
     Please send ideas, comments and suggestions to support@granikos.eu 
  
     .LINK  
-    More information can be found at http://www.granikos.eu/en/scripts 
+    http://www.granikos.eu/en/scripts 
 	
     .DESCRIPTION
 	Exchange Server virtual directories (vDirs) require a proper configuration of
     internal and external Urls. This is even more important in a co-existence 
     scenario with legacy Exchange Server versions.
 
-    Read more about Exchange Server 2013 vDirs at:
-    http://blogs.technet.com/b/exchange/archive/2015/02/11/configuring-multiple-owa-ecp-virtual-directories-on-the-exchange-2013-client-access-server-role.aspx
-    
-
     .NOTES 
     Requirements 
-    - Windows Server 2008 R2 SP1, Windows Server 2012 or Windows Server 2012 R2
-    - Exchange Server 2013
+    - Windows Server 2016+
+    - Exchange Server 2016+
 
     Revision History 
     -------------------------------------------------------------------------------- 
     1.0     Initial community release 
+	2.0     Updated for Exchange Server 2016, 2019, vNEXT
 	
 	.PARAMETER InternalUrl
-    The internal url FQDN with leading protocol definition, ie. https://mobile.mcsmemail.de
+    The internal url FQDN with protocol definition, ie. https://mobile.mcsmemail.de
 
     .PARAMETER ExternalUrl
-    The internal url FQDN with leading protocol definition, ie. https://mobile.mcsmemail.de
+    The internal url FQDN with protocol definition, ie. https://mobile.mcsmemail.de
    
 	.EXAMPLE
     Configure internal and external url for different host headers 
-    .\Set-VirtualDirectoryUrl -InternalUrl https://internal.mcsmemail.de -ExternalUrl https://mobile.mcsmemail.de
+    .\Set-VirtualDirectoryUrl.ps1 -InternalUrl https://internal.mcsmemail.de -ExternalUrl https://mobile.mcsmemail.de
 	
 #>
 
@@ -48,39 +45,38 @@ Param(
     [parameter(Mandatory=$false, ValueFromPipeline=$false, HelpMessage='The internal Url host inclusive protocol, i.e. https://mobile.mcsmemail.de')]
         [string]$InternalUrl,  
     [parameter(Mandatory=$false, ValueFromPipeline=$false, HelpMessage='The external Url host inclusive protocol, i.e. https://mobile.mcsmemail.de')]
-        [string]$ExternalUrl  
+        [string]$ExternalUrl
 )
 
-Set-StrictMode -Version Latest
+# Fetch Exchange Server 2016+ Servers
+$exchangeServers = Get-ExchangeServer | Where {($_.IsE15OrLater -eq $true) -and ($_.ServerRole -ilike "*Mailbox*")}
 
-if($InternalUrl -ne "") {
+
+if($InternalUrl -ne "" -and $exchangeServers -ne $null) {
 
     # Trim trailing "/"
     if($InternalUrl.EndsWith("/")) {
         $InternalUrl = $InternalUrl.TrimEnd('/')
     }
 
-    # Fetch Exchange Server 2013 Servers with CAS role
-    $exchangeServers = Get-ExchangeServer | Where {($_.IsE15OrLater -eq $true) -and ($_.ServerRole -ilike "*ClientAccess*")}
-    Write-Output ""
-    Write-Output "The following servers will be configured:"
+    Write-Output "The script configures the following servers:"
     $exchangeServers | ft Name, AdminDisplayVersion -AutoSize
 
     Write-Output "Changing InternalUrl settings"
     Write-Output "New INTERNAL Url: $InternalUrl"
     
-    $exchangeServers | Get-AutodiscoverVirtualDirectory | Set-AutodiscoverVirtualDirectory -InternalUrl "$InternalUrl/autodiscover/autodiscover.xml"ù 
-    $exchangeServers | Set-ClientAccessServer -AutodiscoverServiceInternalUri "$InternalUrl/autodiscover/autodiscover.xml"ù
-    $exchangeServers | Get-WebServicesVirtualDirectory | Set-WebServicesVirtualDirectory -InternalUrl "$InternalUrl/ews/exchange.asmx"ù
-    $exchangeServers | Get-OabVirtualDirectory | Set-OabVirtualDirectory -InternalUrl "$InternalUrl/oab"ù
-    $exchangeServers | Get-OwaVirtualDirectory | Set-OwaVirtualDirectory -InternalUrl "$InternalUrl/owa"ù
-    $exchangeServers | Get-EcpVirtualDirectory | Set-EcpVirtualDirectory -InternalUrl "$InternalUrl/ecp"ù
-    $exchangeServers | Get-ActiveSyncVirtualDirectory | Set-ActiveSyncVirtualDirectory -InternalUrl "$InternalUrl/Microsoft-Server-ActiveSync"
+    $exchangeServers | %{ Set-ClientAccessService -Identity $_.Name -AutodiscoverServiceInternalUri "$InternalUrl/autodiscover/autodiscover.xml" -Confirm:$false}
+    $exchangeServers | Get-WebServicesVirtualDirectory | Set-WebServicesVirtualDirectory -InternalUrl "$InternalUrl/ews/exchange.asmx" -Confirm:$false
+    $exchangeServers | Get-OabVirtualDirectory | Set-OabVirtualDirectory -InternalUrl "$InternalUrl/oab" -Confirm:$false
+    $exchangeServers | Get-OwaVirtualDirectory | Set-OwaVirtualDirectory -InternalUrl "$InternalUrl/owa" -Confirm:$false
+    $exchangeServers | Get-EcpVirtualDirectory | Set-EcpVirtualDirectory -InternalUrl "$InternalUrl/ecp" -Confirm:$false
+	$exchangeServers | Get-MapiVirtualDirectory | Set-MapiVirtualDirectory -InternalUrl "$InternalUrl/mapi" -Confirm:$false
+    $exchangeServers | Get-ActiveSyncVirtualDirectory | Set-ActiveSyncVirtualDirectory -InternalUrl "$InternalUrl/Microsoft-Server-ActiveSync" -Confirm:$false
     
     Write-Output "InternalUrl changed"
 }
 
-if($ExternalUrl -ne "") {
+if($ExternalUrl -ne "" -and $exchangeServers -ne $null) {
 
     # Trim trailing "/"
     if($ExternalUrl.EndsWith("/")) {
@@ -90,20 +86,18 @@ if($ExternalUrl -ne "") {
     Write-Output "Changing ExternalUrl settings"
     Write-Output "New EXTERNAL Url: $ExternalUrl"
 
-   $exchangeServers | Get-AutodiscoverVirtualDirectory | Set-AutodiscoverVirtualDirectory -ExternalUrl "$ExternalUrl/autodiscover/autodiscover.xml"ù
-   $exchangeServers | Set-ClientAccessServer -AutodiscoverServiceInternalUri "$ExternalUrl/autodiscover/autodiscover.xml"ù
-   $exchangeServers | Get-WebServicesVirtualDirectory | Set-WebServicesVirtualDirectory -ExternalUrl "$ExternalUrl/ews/exchange.asmx"ù
-   $exchangeServers | Get-OabVirtualDirectory | Set-OabVirtualDirectory -ExternalUrl "$ExternalUrl/oab"ù
-   $exchangeServers | Get-OwaVirtualDirectory | Set-OwaVirtualDirectory -ExternalUrl "$ExternalUrl/owa"ù
-   $exchangeServers | Get-EcpVirtualDirectory | Set-EcpVirtualDirectory -ExternalUrl "$ExternalUrl/ecp"ù
-   $exchangeServers | Get-ActiveSyncVirtualDirectory | Set-ActiveSyncVirtualDirectory -ExternalUrl "$ExternalUrl/Microsoft-Server-ActiveSync"
+   $exchangeServers | %{ Set-ClientAccessService -Identity $_.Name -AutodiscoverServiceInternalUri "$ExternalUrl/autodiscover/autodiscover.xml" -Confirm:$false }
+   $exchangeServers | Get-WebServicesVirtualDirectory | Set-WebServicesVirtualDirectory -ExternalUrl "$ExternalUrl/ews/exchange.asmx" -Confirm:$false
+   $exchangeServers | Get-OabVirtualDirectory | Set-OabVirtualDirectory -ExternalUrl "$ExternalUrl/oab" -Confirm:$false
+   $exchangeServers | Get-OwaVirtualDirectory | Set-OwaVirtualDirectory -ExternalUrl "$ExternalUrl/owa" -Confirm:$false
+   $exchangeServers | Get-EcpVirtualDirectory | Set-EcpVirtualDirectory -ExternalUrl "$ExternalUrl/ecp" -Confirm:$false
+   $exchangeServers | Get-MapiVirtualDirectory | Set-MapiVirtualDirectory -ExternalUrl "$ExternalUrl/ecp" -Confirm:$false
+   $exchangeServers | Get-ActiveSyncVirtualDirectory | Set-ActiveSyncVirtualDirectory -ExternalUrl "$ExternalUrl/Microsoft-Server-ActiveSync" -Confirm:$false
 }
  
 if(($InternalUrl -ne "") -or ($ExternalUrl -ne "")) {
     # Query Settings
     Write-Output ""
-    Write-Output "Current Url settings for AutoD Virtual Directory"
-    $exchangeServers | Get-AutodiscoverVirtualDirectory | fl Identity, InternalUrl, ExternalUrl 
     Write-Output "Current Url settings for CAS AutodiscoverServiceInternalUri"
     $exchangeServers | Get-ClientAccessServer | fl Identity, AutodiscoverServiceInternalUri
     Write-Output "Current Url settings for Web Services Virtual Directory"
@@ -114,6 +108,8 @@ if(($InternalUrl -ne "") -or ($ExternalUrl -ne "")) {
     $exchangeServers | Get-OwaVirtualDirectory | fl Identity, InternalUrl,ExternalUrl
     Write-Output "Current Url settings for ECP Virtual Directory"
     $exchangeServers | Get-EcpVirtualDirectory | fl Identity, InternalUrl,ExternalUrl
+    Write-Output "Current Url settings for MAPI Virtual Directory"
+    $exchangeServers | Get-MapiVirtualDirectory | fl Identity, InternalUrl,ExternalUrl
     Write-Output "Current Url settings for ActiveSync Virtual Directory"
     $exchangeServers | Get-ActiveSyncVirtualDirectory | fl Identity, internalurl, ExternalUrl
 }
